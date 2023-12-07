@@ -9,8 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.userModel.findOne({ username }).exec();
+  async getFullUser(username: string): Promise<User | undefined> {
+    return (await this.userModel.findOne({ username }).select("+password").lean().exec());
   }
 
   async create(user: User): Promise<User> {
@@ -53,5 +53,17 @@ export class UserService {
     return this.userModel
       .findOneAndUpdate({ username }, updateUserDto, { new: true })
       .exec();
+  }
+  async getVerificationData(username: string) {
+    const userData = await this.userModel
+      .findOne({ username })
+      .select('email verificationToken');
+    return {
+      email: userData.email,
+      verificationToken: userData.verificationToken,
+    };
+  }
+  async findByVerificationToken(verificationToken: string) {
+    return this.userModel.findOne({ verificationToken }).exec();
   }
 }
