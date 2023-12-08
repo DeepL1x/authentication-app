@@ -10,21 +10,24 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({isGlobal: true}),
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGO),
     UserModule,
     AuthModule,
+    ImageModule,
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '60s' },
       global: true,
     }),
+    ImageModule,
   ],
   providers: [AppService, AuthService, LocalStrategy, JwtStrategy],
-  controllers: [AppController]
+  controllers: [AppController],
 })
 export class AppModule {}
