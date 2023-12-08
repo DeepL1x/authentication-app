@@ -19,10 +19,14 @@ export class ImageService {
       bucketName: 'uploads',
     });
   }
-  
+
   async readStream(filename: string) {
-    const stream = this.gfs.openDownloadStreamByName(filename);
-    return stream;
+    if ((await this.gfs.find({ filename: filename }).toArray()).length > 0) {
+      const stream = this.gfs.openDownloadStreamByName(filename);
+      return stream;
+    } else {
+      throw new Error('File not found');
+    }
   }
 
   async uploadImage(
