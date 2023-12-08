@@ -44,8 +44,8 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
+  async getProfile(@Request() req) {
+    return await this.userService.getFullUser(req.user.username);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -57,13 +57,24 @@ export class UserController {
     @Request() req,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const links = await this.imageService.uploadImage(
-      file,
-      updateUserDto.username,
-    );
+    if (file) {
+      const oldUser = await this.userService.getFullUser(req.user.username);
+      const oldImages = {
+        imgL: oldUser.imgL,
+        imgM: oldUser.imgM,
+        imgS: oldUser.imgS,
+      };
+      for (const size in oldImages) {
+        this.imageService.deleteImage(oldImages[size]);
+      }
+      const links = await this.imageService.uploadImage(
+        file,
+        updateUserDto.username ?? req.user.username,
+      );
 
-    for (const size in links) {
-      updateUserDto[size] = links[size];
+      for (const size in links) {
+        updateUserDto[size] = links[size];
+      }
     }
     const updatedUser = await this.userService.update(
       req.user.username,

@@ -28,7 +28,12 @@ export class ImageService {
       throw new Error('File not found');
     }
   }
-
+  async deleteImage(filename: string) {
+    const files = await this.gfs.find({ filename: filename }).toArray();
+    for (const file of files) {
+      this.gfs.delete(file._id);
+    }
+  }
   async uploadImage(
     file,
     username: string,
