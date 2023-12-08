@@ -11,6 +11,8 @@ export class MongooseExceptionFilter implements ExceptionFilter {
   catch(exception: MongoError, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse();
     let status = HttpStatus.BAD_REQUEST;
+    console.log(exception);
+
     switch (exception.code) {
       case 11000:
         status = HttpStatus.CONFLICT;
@@ -23,7 +25,7 @@ export class MongooseExceptionFilter implements ExceptionFilter {
       default:
         response.status(status).json({
           statusCode: status,
-          message: 'MongoDB Error',
+          message: exception.message,
           error: exception.message,
         });
     }
